@@ -13,10 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
-    env:
-      GODOT_ANDROID_KEYSTORE_DEBUG_PATH: /root/debug.keystore
-      GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
-      GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +23,18 @@ jobs:
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mv /root/.config/godot ~/.config/godot
 
+      - name: Create debug key
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+
       - name: Import project
         run: godot --headless --import || true
 
       - name: Export APK
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
         run: |
           mkdir -v -p build
           godot --headless --verbose --export-debug "Android Debug" build/chicks_rescue.apk
