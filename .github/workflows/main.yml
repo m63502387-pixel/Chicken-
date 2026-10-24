@@ -23,6 +23,9 @@ jobs:
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           mv /root/.config/godot ~/.config/godot
 
+      - name: Enable ETC2/ASTC textures
+        run: sed -i '/^\[rendering\]/a textures/vram_compression/import_etc2_astc=true' project.godot
+
       - name: Create debug key
         run: |
           keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
